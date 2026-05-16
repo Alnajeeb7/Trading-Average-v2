@@ -1,0 +1,390 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* Custom scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.4);
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+  background-clip: padding-box;
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition-property: background-color, border-color, color, transform, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+input,
+button {
+  transition-property: all;
+  transition-duration: 250ms;
+}
+
+/* Premium backdrop blur effect */
+@supports (backdrop-filter: blur(12px)) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+/* Smooth number transitions */
+@keyframes number-change {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Custom font classes */
+.brand-serif {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.hero-number-font {
+  font-family: 'Chakra Petch', 'JetBrains Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.hero-money {
+  font-size: clamp(3rem, 12vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.hero-percent {
+  font-size: clamp(1.25rem, 5vw, 2rem);
+  font-weight: 500;
+}
+
+@keyframes hero-value-pulse {
+  0% {
+    transform: translateY(0) scale(1);
+    text-shadow:
+      0 0 0 rgba(var(--ticket-accent, 255, 255, 255), 0),
+      0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.02);
+    text-shadow:
+      0 0 28px rgba(var(--ticket-accent, 255, 255, 255), 0.34),
+      0 16px 28px rgba(0, 0, 0, 0.32);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    text-shadow:
+      0 0 0 rgba(var(--ticket-accent, 255, 255, 255), 0),
+      0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+}
+
+@keyframes hero-percent-breath {
+  0% {
+    opacity: 0.85;
+    transform: translateY(0);
+    letter-spacing: 0.02em;
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+    letter-spacing: 0.04em;
+  }
+  100% {
+    opacity: 0.85;
+    transform: translateY(0);
+    letter-spacing: 0.02em;
+  }
+}
+
+.hero-money-animate {
+  animation: hero-value-pulse 2.8s ease-in-out infinite;
+  will-change: transform, text-shadow, filter;
+}
+
+.hero-percent-animate {
+  animation: hero-percent-breath 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(var(--ticket-accent, 255, 255, 255), 0.22));
+  will-change: opacity, letter-spacing, transform;
+}
+
+@keyframes hero-ticket-float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-0.35deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes hero-ticket-sheen {
+  0% {
+    background-position: 0 0, 0 0, -185% 0, 0 70%, 0 70%, 0 71%;
+  }
+  100% {
+    background-position: 0 0, 0 0, 230% 0, 32px 70%, 0 70%, 0 71%;
+  }
+}
+
+@keyframes hero-ticket-ambient {
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.06) saturate(1.08);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes hero-badge-sheen {
+  0% {
+    background-position: 0 0, -190% 0;
+  }
+  100% {
+    background-position: 0 0, 220% 0;
+  }
+}
+
+@keyframes hero-badge-breathe {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 10px 22px -16px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+  }
+  50% {
+    transform: translateY(-1px) scale(1.015);
+    box-shadow:
+      0 14px 28px -14px rgba(0, 0, 0, 0.78),
+      0 0 24px -14px rgba(var(--ticket-accent, 255, 255, 255), 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 10px 22px -16px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+  }
+}
+
+@keyframes hero-notch-bob {
+  0% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(-52%) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.85;
+  }
+}
+
+.hero-ticket-plaque {
+  --google-blue: 66, 133, 244;
+  --google-green: 52, 168, 83;
+  --google-yellow: 251, 188, 5;
+  --google-red: 234, 67, 53;
+  --ticket-accent: 255, 255, 255;
+  --ticket-glow: 255, 255, 255;
+  --ticket-seam-y: 70%;
+  --ticket-notch-size: 34px;
+  --ticket-corner-cut: 20px;
+  position: relative;
+  isolation: isolate;
+  padding: clamp(1.35rem, 2.8vw, 2rem) clamp(1.65rem, 4vw, 3rem);
+  border-radius: 1.25rem;
+  clip-path: polygon(
+    var(--ticket-corner-cut) 0,
+    calc(100% - var(--ticket-corner-cut)) 0,
+    100% var(--ticket-corner-cut),
+    100% calc(100% - var(--ticket-corner-cut)),
+    calc(100% - var(--ticket-corner-cut)) 100%,
+    var(--ticket-corner-cut) 100%,
+    0 calc(100% - var(--ticket-corner-cut)),
+    0 var(--ticket-corner-cut)
+  );
+  background-image:
+    linear-gradient(120deg, rgba(var(--google-blue), 0.48) 0%, rgba(var(--google-green), 0.44) 28%, rgba(var(--google-yellow), 0.42) 58%, rgba(var(--google-red), 0.46) 100%),
+    radial-gradient(130% 85% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(112deg, transparent 36%, rgba(255, 255, 255, 0.3) 50%, transparent 64%),
+    repeating-radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.2px 7px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.46) 50%, rgba(255, 255, 255, 0.2) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.45) 0 9px, transparent 9px 16px);
+  background-size: 100% 100%, 100% 100%, 42% 100%, 8px 2px, 100% 1px, 100% 1px;
+  background-position: 0 0, 0 0, -185% 0, 0 var(--ticket-seam-y), 0 var(--ticket-seam-y), 0 calc(var(--ticket-seam-y) + 1px);
+  background-repeat: no-repeat;
+  border: 1px solid rgba(255,255,255,0.16);
+  outline: 1px solid rgba(255, 255, 255, 0.06);
+  outline-offset: -3px;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  box-shadow:
+    0 30px 60px -16px rgba(0,0,0,0.58),
+    0 0 56px -20px rgba(var(--ticket-glow), 0.28),
+    0 0 0 2px rgba(255, 255, 255, 0.04) inset,
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 18px 36px -24px rgba(255,255,255,0.35) inset;
+  animation:
+    hero-ticket-float 7s ease-in-out infinite,
+    hero-ticket-sheen 5.6s linear infinite,
+    hero-ticket-ambient 4.8s ease-in-out infinite;
+  will-change: transform, background-position, filter;
+}
+
+@media (min-width: 1024px) {
+  .hero-ticket-plaque {
+    width: min(100%, 40rem);
+  }
+}
+
+.hero-ticket-plaque::before,
+.hero-ticket-plaque::after {
+  content: '';
+  position: absolute;
+  top: var(--ticket-seam-y);
+  width: var(--ticket-notch-size);
+  height: var(--ticket-notch-size);
+  border-radius: 999px;
+  background: var(--background);
+  transform: translateY(-50%);
+  z-index: 3;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 0 12px rgba(0, 0, 0, 0.24);
+}
+
+.hero-ticket-plaque::before {
+  left: calc(var(--ticket-notch-size) / -2);
+}
+
+.hero-ticket-plaque::after {
+  right: calc(var(--ticket-notch-size) / -2);
+}
+
+.hero-ticket-profit {
+  --ticket-accent: 16, 185, 129;
+  --ticket-glow: 16, 185, 129;
+  border-color: rgba(16,185,129,0.3);
+  box-shadow:
+    0 30px 60px -16px rgba(0,0,0,0.58),
+    0 0 60px -20px rgba(16,185,129,0.34),
+    0 0 0 1px rgba(16,185,129,0.14) inset,
+    0 18px 36px -24px rgba(110, 255, 210, 0.28) inset;
+}
+
+.hero-ticket-loss {
+  --ticket-accent: 239, 68, 68;
+  --ticket-glow: 239, 68, 68;
+  border-color: rgba(239,68,68,0.3);
+  box-shadow:
+    0 30px 60px -16px rgba(0,0,0,0.58),
+    0 0 60px -20px rgba(239,68,68,0.3),
+    0 0 0 1px rgba(239,68,68,0.14) inset,
+    0 18px 36px -24px rgba(255, 148, 148, 0.24) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ticket-plaque,
+  .hero-ticket-plaque::before,
+  .hero-ticket-plaque::after,
+  .hero-money-animate,
+  .hero-percent-animate {
+    animation: none !important;
+  }
+}
+
+.hero-status-badge {
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-image:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.93), rgba(241, 245, 249, 0.86)),
+    linear-gradient(112deg, transparent 34%, rgba(255, 255, 255, 0.75) 50%, transparent 66%);
+  background-size: 100% 100%, 40% 100%;
+  background-repeat: no-repeat;
+  color: rgba(8, 12, 18, 0.92);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  animation:
+    hero-badge-sheen 4.8s linear infinite,
+    hero-badge-breathe 3.1s ease-in-out infinite;
+  will-change: transform, box-shadow, background-position;
+}
+
+.hero-ticket-profit .hero-status-badge {
+  border-color: rgba(16, 185, 129, 0.38);
+}
+
+.hero-ticket-loss .hero-status-badge {
+  border-color: rgba(239, 68, 68, 0.36);
+}
+
+.record-buy-gradient {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background-color: #4285f4;
+  background-image:
+    linear-gradient(120deg, rgba(66, 133, 244, 0.96) 0%, rgba(52, 168, 83, 0.93) 30%, rgba(251, 188, 5, 0.92) 62%, rgba(234, 67, 53, 0.95) 100%),
+    linear-gradient(112deg, transparent 34%, rgba(255, 255, 255, 0.7) 50%, transparent 66%);
+  background-size: 100% 100%, 42% 100%;
+  background-position: 0 0, -180% 0;
+  background-repeat: no-repeat;
+  box-shadow:
+    0 12px 26px -14px rgba(66, 133, 244, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  animation: hero-badge-sheen 4.8s linear infinite;
+}
+
+.record-buy-gradient:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.record-buy-gradient:disabled {
+  animation: none;
+  filter: grayscale(0.25);
+}
