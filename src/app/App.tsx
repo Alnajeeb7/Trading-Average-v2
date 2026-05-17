@@ -294,22 +294,13 @@ export default function App() {
     }
   }, []);
 
-  // Save to localStorage whenever data changes
+  // Save to localStorage - batched updates
   useEffect(() => {
     localStorage.setItem('portfolio-transactions', JSON.stringify(transactions));
-  }, [transactions]);
-
-  useEffect(() => {
     localStorage.setItem('portfolio-livePrice', livePrice.toString());
-  }, [livePrice]);
-
-  useEffect(() => {
     localStorage.setItem('portfolio-manualTarget', manualTarget);
-  }, [manualTarget]);
-
-  useEffect(() => {
     localStorage.setItem('portfolio-selectedPlan', selectedPlan);
-  }, [selectedPlan]);
+  }, [transactions, livePrice, manualTarget, selectedPlan]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
@@ -339,30 +330,33 @@ export default function App() {
 
   // Recovery Plans
   const calculateRecoveryShares = (targetAvg: number, isManual: boolean = false) => {
-    // Basic validation
     if (!targetAvg || targetAvg <= 0 || livePrice <= 0 || totalShares <= 0 || avgBuyPrice <= 0) {
       return 0;
     }
-
-    // Avoid division by zero
     if (targetAvg === livePrice) {
       return 0;
     }
-
-    // For presets, enforce that we're in loss and target is between current price and avg buy price
     if (!isManual) {
       if (currentLoss <= 0 || targetAvg <= livePrice || targetAvg >= avgBuyPrice) {
         return 0;
       }
     } else {
-      // For manual: allow any target above current price (no upper bound)
       if (targetAvg <= livePrice) {
         return 0;
       }
     }
-
     const shares = (totalInvested - (targetAvg * totalShares)) / (targetAvg - livePrice);
     return shares > 0 ? Math.ceil(shares) : 0;
+  };
+
+  const createRecoveryPlan = (name: string, targetAvg: number, isManual: boolean): RecoveryPlan => {
+    const sharesToBuy = calculateRecoveryShares(targetAvg, isManual);
+    return {
+      name,
+      targetAvg,
+      sharesToBuy,
+      capitalRequired: sharesToBuy * livePrice,
+    };
   };
 
   const shouldShowRecoveryValues = currentLoss > 0 && livePrice > 0 && avgBuyPrice > livePrice;
@@ -381,30 +375,10 @@ export default function App() {
 
   // Only calculate recovery plans if in loss
   const recoveryPlans: RecoveryPlan[] = currentLoss > 0 ? [
-    {
-      name: 'Aggressive',
-      targetAvg: aggressiveTarget,
-      sharesToBuy: calculateRecoveryShares(aggressiveTarget, false),
-      capitalRequired: calculateRecoveryShares(aggressiveTarget, false) * livePrice,
-    },
-    {
-      name: 'Balanced',
-      targetAvg: balancedTarget,
-      sharesToBuy: calculateRecoveryShares(balancedTarget, false),
-      capitalRequired: calculateRecoveryShares(balancedTarget, false) * livePrice,
-    },
-    {
-      name: 'Conservative',
-      targetAvg: conservativeTarget,
-      sharesToBuy: calculateRecoveryShares(conservativeTarget, false),
-      capitalRequired: calculateRecoveryShares(conservativeTarget, false) * livePrice,
-    },
-    {
-      name: 'Manual',
-      targetAvg: resolvedManualTarget,
-      sharesToBuy: calculateRecoveryShares(resolvedManualTarget, true),
-      capitalRequired: calculateRecoveryShares(resolvedManualTarget, true) * livePrice,
-    },
+    createRecoveryPlan('Aggressive', aggressiveTarget, false),
+    createRecoveryPlan('Balanced', balancedTarget, false),
+    createRecoveryPlan('Conservative', conservativeTarget, false),
+    createRecoveryPlan('Manual', resolvedManualTarget, true),
   ] : [];
 
   // Filter out recovery plans with 0 shares
@@ -472,11 +446,7 @@ export default function App() {
 
   return (
     <>
-      {/* Glowing Border Effect */}
-      <div className="glow-border-wrapper">
-        <div className="glow-border"></div>
-      </div>
-      
+      <div className="glow-border-wrapper" />
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300 overflow-x-hidden relative z-10">
       <div className="relative z-10">
       {/* Header - Fixed with blur backdrop */}
