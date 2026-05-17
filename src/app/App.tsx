@@ -446,7 +446,15 @@ export default function App() {
 
   return (
     <>
-      <div className="glow-border-wrapper" />
+      <div className="fixed inset-0 pointer-events-none z-[9999]" style={{
+        background: `linear-gradient(to right, rgb(66, 133, 244), rgb(52, 168, 83), rgb(251, 188, 5), rgb(234, 67, 53)),
+                     linear-gradient(to right, rgb(66, 133, 244), rgb(52, 168, 83), rgb(251, 188, 5), rgb(234, 67, 53)),
+                     linear-gradient(to bottom, rgb(66, 133, 244), rgb(52, 168, 83), rgb(251, 188, 5), rgb(234, 67, 53)),
+                     linear-gradient(to bottom, rgb(66, 133, 244), rgb(52, 168, 83), rgb(251, 188, 5), rgb(234, 67, 53))`,
+        backgroundSize: '100% clamp(2px, 0.4vw, 4px), 100% clamp(2px, 0.4vw, 4px), clamp(2px, 0.4vw, 4px) 100%, clamp(2px, 0.4vw, 4px) 100%',
+        backgroundPosition: 'top, bottom, left, right',
+        backgroundRepeat: 'no-repeat'
+      }} />
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300 overflow-x-hidden relative z-10">
       <div className="relative z-10">
       {/* Header - Fixed with blur backdrop */}
