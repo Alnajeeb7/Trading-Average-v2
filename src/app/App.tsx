@@ -156,17 +156,17 @@ function ShowcaseCarousel() {
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="mb-12 flex flex-col gap-6 md:gap-4 md:flex-row md:items-end md:justify-between sm:mb-16">
         <div className="space-y-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs uppercase tracking-widest text-emerald-300">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             Investor Notes
           </span>
-          <h3 className="text-3xl font-light tracking-tight sm:text-4xl md:text-6xl">
+          <h3 className="text-2xl font-light tracking-tight sm:text-3xl md:text-4xl lg:text-6xl">
             What these numbers mean
           </h3>
         </div>
-        <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+        <p className="max-w-xl text-sm sm:text-base leading-relaxed text-muted-foreground">
           Use this section to understand your average price, current risk, and when averaging down may help or hurt your position.
         </p>
       </div>
@@ -265,6 +265,7 @@ export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<string>('balanced');
   const [manualTarget, setManualTarget] = useState<string>('');
+  const [targetLivePrice, setTargetLivePrice] = useState<string>('');
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
 
@@ -418,9 +419,18 @@ export default function App() {
     ? (totalInvested + activePlan.capitalRequired) / finalShares
     : avgBuyPrice;
   const priceRiseRequired = newAvgPrice > 0 ? ((newAvgPrice - livePrice) / livePrice) * 100 : 0;
-  // Net profit on new shares = (target price - current price) × shares to buy
-  const netProfitAtTarget = activePlan && activePlan.sharesToBuy > 0 && activePlan.targetAvg > 0 && livePrice > 0
-    ? (activePlan.targetAvg - livePrice) * activePlan.sharesToBuy
+  // Net profit at target = (Target Price × Final Shares) - Total Invested
+  const netProfitAtTarget = activePlan && activePlan.sharesToBuy > 0 && activePlan.targetAvg > 0
+    ? (activePlan.targetAvg * finalShares) - (totalInvested + activePlan.capitalRequired)
+    : 0;
+
+  // Target live price calculations - if price reaches X, what's the profit?
+  const targetLivePriceNum = parseFloat(targetLivePrice);
+  const targetLivePriceProfit = targetLivePrice && !isNaN(targetLivePriceNum) && targetLivePriceNum > 0 && finalShares > 0
+    ? (targetLivePriceNum * finalShares) - (totalInvested + (activePlan?.capitalRequired || 0))
+    : 0;
+  const priceRiseToTarget = livePrice > 0 && targetLivePriceNum > 0 
+    ? ((targetLivePriceNum - livePrice) / livePrice) * 100 
     : 0;
 
   const handleRecordBuy = () => {
@@ -461,7 +471,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 overflow-x-hidden">
+    <>
+      {/* Glowing Border Effect */}
+      <div className="glow-border-wrapper">
+        <div className="glow-border"></div>
+      </div>
+      
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300 overflow-x-hidden relative z-10">
+      <div className="relative z-10">
       {/* Header - Fixed with blur backdrop */}
       <motion.header
         className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl"
@@ -880,52 +897,67 @@ export default function App() {
             </motion.div>
             )}
 
-            {/* Projection */}
+            {/* Target Live Price Calculator */}
             {activePlan && activePlan.sharesToBuy > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1, duration: 0.6 }}
+                transition={{ delay: 1.2, duration: 0.6 }}
               >
-                <Card className="p-5 bg-gradient-to-br from-emerald-500/5 to-amber-500/5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-500 sm:p-8">
+                <Card className="p-5 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/20 hover:border-blue-500/30 transition-all duration-500 sm:p-8">
                   <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-6">
-                    Projection ({activePlan.name} Plan)
+                    If Price Reaches Target
                   </h3>
 
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Final Shares</p>
-                      <p className="break-words text-2xl font-mono tracking-tight sm:text-3xl">{finalShares}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">New Avg Price</p>
-                      <p className="break-words text-2xl font-mono tracking-tight sm:text-3xl">₹{newAvgPrice.toFixed(2)}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Required Rise</p>
-                      <p className="break-words text-2xl font-mono text-amber-500 tracking-tight sm:text-3xl">
-                        {priceRiseRequired.toFixed(2)}%
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Net Profit</p>
-                      <p className="break-words text-2xl font-mono text-emerald-500 tracking-tight sm:text-3xl">
-                        ₹{netProfitAtTarget.toFixed(2)}
-                      </p>
-                    </div>
+                  <div className="mb-6">
+                    <label className="block text-sm text-muted-foreground mb-3 uppercase tracking-wider">
+                      Target Live Price (₹)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Enter target price"
+                      value={targetLivePrice}
+                      onChange={(e) => setTargetLivePrice(e.target.value)}
+                      className="text-center text-2xl font-mono h-14 bg-muted/30 border-border hover:bg-muted/50 transition-all duration-300"
+                    />
                   </div>
 
-                  <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                    <p className="text-base text-muted-foreground leading-relaxed">
-                      If you buy <span className="font-mono text-foreground">{activePlan.sharesToBuy}</span> more shares at current price
-                      (<span className="font-mono text-foreground">₹{livePrice.toFixed(2)}</span>),
-                      your average will reduce to <span className="font-mono text-foreground">₹{newAvgPrice.toFixed(2)}</span>.
-                      To break even, the price needs to rise by <span className="font-mono text-amber-500">{priceRiseRequired.toFixed(2)}%</span>.
+                  {targetLivePrice && !isNaN(targetLivePriceNum) && targetLivePriceNum > 0 && (
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Price Rise Needed</p>
+                        <p className={`text-2xl font-mono tracking-tight sm:text-3xl ${
+                          priceRiseToTarget >= 0 ? 'text-blue-500' : 'text-red-500'
+                        }`}>
+                          {priceRiseToTarget.toFixed(2)}%
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Total Profit</p>
+                        <p className={`text-2xl font-mono tracking-tight sm:text-3xl ${
+                          targetLivePriceProfit >= 0 ? 'text-emerald-500' : 'text-red-500'
+                        }`}>
+                          ₹{targetLivePriceProfit.toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wider">Profit per Share</p>
+                        <p className={`text-2xl font-mono tracking-tight sm:text-3xl ${
+                          (targetLivePriceProfit / finalShares) >= 0 ? 'text-cyan-500' : 'text-red-500'
+                        }`}>
+                          ₹{(targetLivePriceProfit / finalShares).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(!targetLivePrice || isNaN(targetLivePriceNum) || targetLivePriceNum <= 0) && (
+                    <p className="text-base text-muted-foreground text-center py-4">
+                      Enter a target price to see projected profit
                     </p>
-                  </div>
+                  )}
                 </Card>
               </motion.div>
             )}
@@ -1149,6 +1181,8 @@ export default function App() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
+    </>
   );
 }

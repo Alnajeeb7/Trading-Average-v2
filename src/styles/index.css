@@ -388,3 +388,60 @@ button {
   animation: none;
   filter: grayscale(0.25);
 }
+
+/* Spinning Gradient Border Animation */
+@keyframes spin-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.glow-border-wrapper {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  border-radius: 0;
+}
+
+.glow-border {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    rgb(66, 133, 244),
+    rgb(234, 67, 53),
+    rgb(251, 188, 5),
+    rgb(52, 168, 83),
+    rgb(66, 133, 244)
+  );
+  animation: spin-gradient 8s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  box-shadow:
+    0 0 18px rgba(66, 133, 244, 0.25),
+    0 0 28px rgba(234, 67, 53, 0.18);
+}
+
+html {
+  position: relative;
+}
