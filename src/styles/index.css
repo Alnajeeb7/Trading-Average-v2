@@ -408,6 +408,9 @@ button {
   pointer-events: none;
   z-index: 40;
   border-radius: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .glow-border {
