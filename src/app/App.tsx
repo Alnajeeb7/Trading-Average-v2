@@ -338,21 +338,30 @@ export default function App() {
 
   // Recovery Plans
   const calculateRecoveryShares = (targetAvg: number, isManual: boolean = false) => {
-    if (currentLoss <= 0 || livePrice <= 0 || totalShares <= 0 || avgBuyPrice <= 0) {
+    // Basic validation
+    if (!targetAvg || targetAvg <= 0 || livePrice <= 0 || totalShares <= 0 || avgBuyPrice <= 0) {
       return 0;
     }
 
-    // For manual targets, allow more flexibility; for presets, enforce constraints
-    if (!isManual && (targetAvg <= livePrice || targetAvg >= avgBuyPrice)) {
-      return 0;
-    }
-
+    // Avoid division by zero
     if (targetAvg === livePrice) {
       return 0;
     }
 
-    const shares = Math.ceil((totalInvested - (targetAvg * totalShares)) / (targetAvg - livePrice));
-    return Number.isFinite(shares) ? Math.max(0, shares) : 0;
+    // For presets, enforce that we're in loss and target is between current price and avg buy price
+    if (!isManual) {
+      if (currentLoss <= 0 || targetAvg <= livePrice || targetAvg >= avgBuyPrice) {
+        return 0;
+      }
+    } else {
+      // For manual: allow any target above current price (no upper bound)
+      if (targetAvg <= livePrice) {
+        return 0;
+      }
+    }
+
+    const shares = (totalInvested - (targetAvg * totalShares)) / (targetAvg - livePrice);
+    return shares > 0 ? Math.ceil(shares) : 0;
   };
 
   const shouldShowRecoveryValues = currentLoss > 0 && livePrice > 0 && avgBuyPrice > livePrice;
@@ -366,9 +375,11 @@ export default function App() {
     ? avgBuyPrice - ((avgBuyPrice - livePrice) * 0.25)
     : 0;
   const manualTargetNum = parseFloat(manualTarget);
-  const resolvedManualTarget = shouldShowRecoveryValues && manualTarget && !isNaN(manualTargetNum) && manualTargetNum > 0 ? manualTargetNum : 0;
+  // Allow manual target input independently - if input is valid and positive, use it
+  const resolvedManualTarget = manualTarget && !isNaN(manualTargetNum) && manualTargetNum > 0 ? manualTargetNum : 0;
 
-  const recoveryPlans: RecoveryPlan[] = [
+  // Only calculate recovery plans if in loss
+  const recoveryPlans: RecoveryPlan[] = currentLoss > 0 ? [
     {
       name: 'Aggressive',
       targetAvg: aggressiveTarget,
@@ -393,10 +404,13 @@ export default function App() {
       sharesToBuy: calculateRecoveryShares(resolvedManualTarget, true),
       capitalRequired: calculateRecoveryShares(resolvedManualTarget, true) * livePrice,
     },
-  ];
+  ] : [];
+
+  // Filter out recovery plans with 0 shares
+  const filteredRecoveryPlans = recoveryPlans.filter(plan => plan.sharesToBuy > 0);
 
   // Get selected recovery plan
-  const activePlan = recoveryPlans.find(p => p.name.toLowerCase() === selectedPlan);
+  const activePlan = filteredRecoveryPlans.find(p => p.name.toLowerCase() === selectedPlan);
   
   // Projection calculations
   const finalShares = activePlan ? totalShares + activePlan.sharesToBuy : totalShares;
@@ -404,8 +418,9 @@ export default function App() {
     ? (totalInvested + activePlan.capitalRequired) / finalShares
     : avgBuyPrice;
   const priceRiseRequired = newAvgPrice > 0 ? ((newAvgPrice - livePrice) / livePrice) * 100 : 0;
-  const netProfitAtTarget = activePlan && activePlan.sharesToBuy > 0
-    ? (avgBuyPrice * finalShares) - (totalInvested + activePlan.capitalRequired)
+  // Net profit on new shares = (target price - current price) × shares to buy
+  const netProfitAtTarget = activePlan && activePlan.sharesToBuy > 0 && activePlan.targetAvg > 0 && livePrice > 0
+    ? (activePlan.targetAvg - livePrice) * activePlan.sharesToBuy
     : 0;
 
   const handleRecordBuy = () => {
@@ -786,7 +801,8 @@ export default function App() {
               </Card>
             </div>
 
-            {/* Recovery Plans */}
+            {/* Recovery Plans - Only show when in loss */}
+            {currentLoss > 0 && (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -816,7 +832,7 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {recoveryPlans.map((plan, index) => (
+                        {filteredRecoveryPlans.map((plan, index) => (
                           <motion.tr
                             key={plan.name}
                             onClick={() => setSelectedPlan(plan.name.toLowerCase())}
@@ -862,6 +878,7 @@ export default function App() {
                   </div>
                 </Card>
             </motion.div>
+            )}
 
             {/* Projection */}
             {activePlan && activePlan.sharesToBuy > 0 && (
