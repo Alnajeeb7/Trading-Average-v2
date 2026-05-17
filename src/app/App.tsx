@@ -337,15 +337,17 @@ export default function App() {
   const currentLoss = totalPnL < 0 ? Math.abs(totalPnL) : 0;
 
   // Recovery Plans
-  const calculateRecoveryShares = (targetAvg: number) => {
-    if (
-      currentLoss <= 0 ||
-      livePrice <= 0 ||
-      totalShares <= 0 ||
-      avgBuyPrice <= 0 ||
-      targetAvg <= livePrice ||
-      targetAvg >= avgBuyPrice
-    ) {
+  const calculateRecoveryShares = (targetAvg: number, isManual: boolean = false) => {
+    if (currentLoss <= 0 || livePrice <= 0 || totalShares <= 0 || avgBuyPrice <= 0) {
+      return 0;
+    }
+
+    // For manual targets, allow more flexibility; for presets, enforce constraints
+    if (!isManual && (targetAvg <= livePrice || targetAvg >= avgBuyPrice)) {
+      return 0;
+    }
+
+    if (targetAvg === livePrice) {
       return 0;
     }
 
@@ -370,26 +372,26 @@ export default function App() {
     {
       name: 'Aggressive',
       targetAvg: aggressiveTarget,
-      sharesToBuy: calculateRecoveryShares(aggressiveTarget),
-      capitalRequired: calculateRecoveryShares(aggressiveTarget) * livePrice,
+      sharesToBuy: calculateRecoveryShares(aggressiveTarget, false),
+      capitalRequired: calculateRecoveryShares(aggressiveTarget, false) * livePrice,
     },
     {
       name: 'Balanced',
       targetAvg: balancedTarget,
-      sharesToBuy: calculateRecoveryShares(balancedTarget),
-      capitalRequired: calculateRecoveryShares(balancedTarget) * livePrice,
+      sharesToBuy: calculateRecoveryShares(balancedTarget, false),
+      capitalRequired: calculateRecoveryShares(balancedTarget, false) * livePrice,
     },
     {
       name: 'Conservative',
       targetAvg: conservativeTarget,
-      sharesToBuy: calculateRecoveryShares(conservativeTarget),
-      capitalRequired: calculateRecoveryShares(conservativeTarget) * livePrice,
+      sharesToBuy: calculateRecoveryShares(conservativeTarget, false),
+      capitalRequired: calculateRecoveryShares(conservativeTarget, false) * livePrice,
     },
     {
       name: 'Manual',
       targetAvg: resolvedManualTarget,
-      sharesToBuy: calculateRecoveryShares(resolvedManualTarget),
-      capitalRequired: calculateRecoveryShares(resolvedManualTarget) * livePrice,
+      sharesToBuy: calculateRecoveryShares(resolvedManualTarget, true),
+      capitalRequired: calculateRecoveryShares(resolvedManualTarget, true) * livePrice,
     },
   ];
 
@@ -402,7 +404,9 @@ export default function App() {
     ? (totalInvested + activePlan.capitalRequired) / finalShares
     : avgBuyPrice;
   const priceRiseRequired = newAvgPrice > 0 ? ((newAvgPrice - livePrice) / livePrice) * 100 : 0;
-  const netProfitAtTarget = activePlan ? (newAvgPrice * finalShares) - (totalInvested + activePlan.capitalRequired) : 0;
+  const netProfitAtTarget = activePlan && activePlan.sharesToBuy > 0
+    ? (avgBuyPrice * finalShares) - (totalInvested + activePlan.capitalRequired)
+    : 0;
 
   const handleRecordBuy = () => {
     const qty = parseFloat(quantity);
@@ -458,7 +462,7 @@ export default function App() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
-              Portfolio Analyzer
+              KNOW YOUR LOSS
             </motion.h1>
             <motion.div
               className="flex shrink-0 items-center gap-2 pl-0.5 sm:pl-0"
@@ -960,7 +964,7 @@ export default function App() {
       <Dialog open={howToUseOpen} onOpenChange={setHowToUseOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>How to Use Portfolio Analyzer</DialogTitle>
+            <DialogTitle>How to Use KNOW YOUR LOSS</DialogTitle>
             <DialogDescription>
               A step-by-step guide to track and optimize your stock portfolio
             </DialogDescription>
@@ -1054,7 +1058,7 @@ export default function App() {
           <DialogHeader>
             <DialogTitle>Terms & Conditions</DialogTitle>
             <DialogDescription>
-              Important information about using Portfolio Analyzer
+              Important information about using KNOW YOUR LOSS
             </DialogDescription>
           </DialogHeader>
 
@@ -1122,7 +1126,7 @@ export default function App() {
 
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground">
-                By using Portfolio Analyzer, you acknowledge that you have read, understood, and agree to these terms and conditions.
+                By using KNOW YOUR LOSS , you acknowledge that you have read, understood, and agree to these terms and conditions.
               </p>
             </div>
           </div>

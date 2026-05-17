@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Portfolio Analyzer</strong> — Track your stock positions, calculate average buy price, and plan recovery strategies with ease.
+  <strong>KNOW YOUR LOSS</strong> — Track your stock positions, calculate average buy price, and plan recovery strategies with ease.
 </p>
 
 ---
